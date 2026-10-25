@@ -1,9 +1,16 @@
 import { createHash } from "node:crypto";
+import type { Reading } from "../ai";
 import type { Kv } from "../kv";
 import type { ParsedRow } from "./parse";
 
 /** A stored row. Its id is a hash of its content, so the same row is always the same enquiry. */
 export type Enquiry = ParsedRow & { id: string; uploadedAt: number };
+
+/** The AI's reading of a row, plus the last error. A failed AI call leaves `reading` null. */
+export type Extraction = {
+  reading: Reading | null;
+  error: { stage: "ai" | "draft"; message: string } | null;
+};
 
 export const keys = {
   enquiries: "enquiries",
@@ -35,3 +42,6 @@ export async function saveUpload(kv: Kv, rows: ParsedRow[], now: number): Promis
 }
 
 export const loadEnquiry = (kv: Kv, id: string) => kv.get<Enquiry>(keys.enquiry(id));
+
+export const loadExtraction = (kv: Kv, id: string) => kv.get<Extraction>(keys.extraction(id));
+export const saveExtraction = (kv: Kv, id: string, extraction: Extraction) => kv.set(keys.extraction(id), extraction);
