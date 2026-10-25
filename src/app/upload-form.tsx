@@ -34,7 +34,12 @@ export function UploadForm() {
           {pending ? "Uploading…" : "Upload"}
         </Button>
       </form>
-      <p className="mt-3 text-sm text-muted">One enquiry per row, headers in the first row. A .csv or .xlsx file, up to 1 MB and 500 rows.</p>
+      <p className="mt-3 text-sm text-muted">
+        One enquiry per row, headers in the first row. A .csv or .xlsx file, up to 1 MB and 500 rows.{" "}
+        <a href="/example-enquiries.csv" download className="text-foreground underline underline-offset-2 hover:no-underline">
+          Download an example file
+        </a>
+      </p>
 
       <div aria-live="polite">
         {state.kind === "error" && <p className="mt-4 text-danger">{state.message}</p>}

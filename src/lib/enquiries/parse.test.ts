@@ -146,10 +146,10 @@ describe("parseSheet: file checks", () => {
   });
 });
 
-describe("samples/enquiries-3-rows.csv", () => {
+describe("public/example-enquiries.csv", () => {
   it("parses into the three rows of the end-to-end test", async () => {
     const { readFileSync } = await import("node:fs");
-    const result = rows(parseSheet(readFileSync("samples/enquiries-3-rows.csv"), "enquiries-3-rows.csv"));
+    const result = rows(parseSheet(readFileSync("public/example-enquiries.csv"), "example-enquiries.csv"));
     expect(result.map((r) => r.company)).toEqual(["[TEST] Northwind", "[TEST] Contoso", "[TEST] Fabrikam"]);
     expect(result[2].message).toBe("Board dinner on 2027.12.03 for 12, private dining room");
   });
