@@ -174,6 +174,6 @@ describe("ensureDraft", () => {
     const p = fakeProposales();
     const vague: Reading = { ...reading, guests: { kind: "approximate", asStated: "30–40" } };
     await ensureDraft(deps(kv, p.client), enquiry, vague, TODAY);
-    expect(p.proposals[0].description_md).toContain('**To check**\n- Guests: the enquiry says "30–40".');
+    expect(p.proposals[0].description_md).toContain('*To check*\n• Guests: the enquiry says "30–40".');
   });
 });

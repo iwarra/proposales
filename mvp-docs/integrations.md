@@ -41,7 +41,7 @@ Spec: <https://docs.proposales.com/openapi.json>. Base URL `https://api.proposal
 }
 ```
 
-It returns `{ "proposal": { "uuid", "url" } }`. How the title and description are built is in [draft.md](draft.md).
+It returns `{ "proposal": { "uuid", "url" } }`. How the title and description are built is in [draft.md](draft.md). `description_md` uses Proposales' own markdown, not CommonMark: see [draft.md](draft.md#example).
 
 - Only `company_id` and `language` are required. The app sends just the fields above. It leaves out the rest of the spec's optional fields (blocks, attachments, invoicing, …).
 - `recipient` leaves out every field it doesn't have, and is left out entirely when it's empty.

@@ -13,8 +13,18 @@ export type ProposalBody = {
 };
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const TO_CONFIRM = "*(approximate — to confirm)*";
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/*
+ * Proposales' markdown is not CommonMark. Checked against a real draft's description_html:
+ * *text* is bold, a newline is a line break and a blank line starts a paragraph.
+ * **text**, "- " lists and "> " quotes are shown as typed. So only those three are used here.
+ */
+const bold = (text: string) => `*${text}*`;
+const TO_CONFIRM = bold("(approximate — to confirm)");
+
+/** Client and AI text: a "*" would toggle bold, so it becomes "∗", which looks the same. */
+const plainText = (text: string) => text.replace(/\*/g, "∗");
 
 /** "2027-03-12" → "12 Mar 2027", read straight from the string so no timezone can shift it. */
 function formatDate(iso: string): string {
@@ -29,15 +39,15 @@ export function formatDateRange(start: string, end: string): string {
 /** Exact values formatted, approximate ones as the client wrote them. Ambiguous and missing never reach a draft. */
 function plain(field: DatesField | CountField): string | null {
   if (field.kind === "exact") return "startDate" in field ? formatDateRange(field.startDate, field.endDate) : String(field.count);
-  if (field.kind === "approximate") return field.asStated;
+  if (field.kind === "approximate") return plainText(field.asStated);
   return null;
 }
 
 function line(label: string, field: DatesField | CountField, exactText?: (value: string) => string): string | null {
   const value = plain(field);
   if (value === null) return null;
-  if (field.kind === "approximate") return `- **${label}:** ${value} ${TO_CONFIRM}`;
-  return `- **${label}:** ${exactText ? exactText(value) : value}`;
+  if (field.kind === "approximate") return `${bold(`${label}:`)} ${value} ${TO_CONFIRM}`;
+  return `${bold(`${label}:`)} ${exactText ? exactText(value) : value}`;
 }
 
 function recipientOf(contact: { company: string | null; name: string | null; email: string | null }): Recipient | undefined {
@@ -68,22 +78,24 @@ export function buildProposalBody(input: { enquiry: Enquiry; reading: Reading; t
     email: enquiry.contactEmail ?? reading.contact.email,
   };
 
-  const who = contact.company ?? contact.name ?? "New enquiry";
-  const what = reading.eventName ?? `${plain(reading.guests)} guests`;
+  const who = plainText(contact.company ?? contact.name ?? "New enquiry");
+  const what = reading.eventName ? plainText(reading.eventName) : `${plain(reading.guests)} guests`;
   const title = `${who}: ${what}, ${plain(reading.dates)}`;
 
   const details = [
     line("Dates", reading.dates),
     line("Guests", reading.guests),
     line("Rooms", reading.rooms, (count) => (count === "0" ? "none" : count)),
-    reading.meetingSpace && `- **Meeting space:** ${reading.meetingSpace}`,
-    reading.catering && `- **Catering:** ${reading.catering}`,
-    reading.notes && `- **Notes:** ${reading.notes}`,
+    reading.meetingSpace && `${bold("Meeting space:")} ${plainText(reading.meetingSpace)}`,
+    reading.catering && `${bold("Catering:")} ${plainText(reading.catering)}`,
+    reading.notes && `${bold("Notes:")} ${plainText(reading.notes)}`,
   ].filter(Boolean);
 
   const sections = [details.join("\n")];
-  if (toCheck.length > 0) sections.push(["**To check**", ...toCheck.map((item) => `- ${item}`)].join("\n"));
-  sections.push(["**Original enquiry**", ...enquiry.message.split("\n").map((text) => `> ${text}`)].join("\n"));
+  if (toCheck.length > 0) sections.push([bold("To check"), ...toCheck.map((item) => `• ${plainText(item)}`)].join("\n"));
+  // Blank lines inside the enquiry would split it into paragraphs, so it's kept as one block of lines.
+  const original = enquiry.message.split(/\n+/).map(plainText).join("\n");
+  sections.push(`${bold("Original enquiry")}\n${original}`);
 
   const recipient = recipientOf(contact);
   return {

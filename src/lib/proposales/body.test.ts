@@ -48,18 +48,18 @@ describe("buildProposalBody", () => {
       language: "en",
       title_md: "Northwind: Kick-off, mid March",
       description_md: [
-        "- **Dates:** mid March *(approximate — to confirm)*",
-        "- **Guests:** 30–40 *(approximate — to confirm)*",
-        "- **Rooms:** none",
-        "- **Meeting space:** 2 breakout rooms",
-        "- **Catering:** Lunch both days",
+        "*Dates:* mid March *(approximate — to confirm)*",
+        "*Guests:* 30–40 *(approximate — to confirm)*",
+        "*Rooms:* none",
+        "*Meeting space:* 2 breakout rooms",
+        "*Catering:* Lunch both days",
         "",
-        "**To check**",
-        '- Dates: the enquiry says "mid March".',
-        '- Guests: the enquiry says "30–40".',
+        "*To check*",
+        '• Dates: the enquiry says "mid March".',
+        '• Guests: the enquiry says "30–40".',
         "",
-        "**Original enquiry**",
-        "> Kick-off mid March, lunch both days, 2 breakouts, no rooms needed",
+        "*Original enquiry*",
+        "Kick-off mid March, lunch both days, 2 breakouts, no rooms needed",
       ].join("\n"),
       recipient: { company_name: "Northwind" },
       data: { enquiry_id: "abc123", source: "enquiry-desk" },
@@ -71,15 +71,15 @@ describe("buildProposalBody", () => {
     expect(body.title_md).toBe("Northwind: Kick-off, 12 Mar 2027 – 13 Mar 2027");
     expect(body.description_md).toBe(
       [
-        "- **Dates:** 12 Mar 2027 – 13 Mar 2027",
-        "- **Guests:** 40",
-        "- **Rooms:** 20",
-        "- **Meeting space:** 2 breakout rooms",
-        "- **Catering:** Lunch both days",
-        "- **Notes:** Vegetarian options for 5.",
+        "*Dates:* 12 Mar 2027 – 13 Mar 2027",
+        "*Guests:* 40",
+        "*Rooms:* 20",
+        "*Meeting space:* 2 breakout rooms",
+        "*Catering:* Lunch both days",
+        "*Notes:* Vegetarian options for 5.",
         "",
-        "**Original enquiry**",
-        "> Kick-off mid March, lunch both days, 2 breakouts, no rooms needed",
+        "*Original enquiry*",
+        "Kick-off mid March, lunch both days, 2 breakouts, no rooms needed",
       ].join("\n"),
     );
     expect(body.recipient).toEqual({ first_name: "Anna", last_name: "Berg", email: "anna@northwind.se", company_name: "Northwind" });
@@ -90,7 +90,7 @@ describe("buildProposalBody", () => {
     const body = buildProposalBody({ enquiry, reading, toCheck: [], companyId: 1 });
     expect(body.title_md).toBe("Northwind: 40 guests, 12 Mar 2027 – 13 Mar 2027");
     expect(body.description_md).toBe(
-      ["- **Dates:** 12 Mar 2027 – 13 Mar 2027", "- **Guests:** 40", "", "**Original enquiry**", "> Kick-off mid March, lunch both days, 2 breakouts, no rooms needed"].join(
+      ["*Dates:* 12 Mar 2027 – 13 Mar 2027", "*Guests:* 40", "", "*Original enquiry*", "Kick-off mid March, lunch both days, 2 breakouts, no rooms needed"].join(
         "\n",
       ),
     );
@@ -99,13 +99,25 @@ describe("buildProposalBody", () => {
   it("approximate rooms are marked too", () => {
     const reading: Reading = { ...exact, rooms: { kind: "approximate", asStated: "about 20" } };
     expect(buildProposalBody({ enquiry, reading, toCheck: [], companyId: 1 }).description_md).toContain(
-      "- **Rooms:** about 20 *(approximate — to confirm)*",
+      "*Rooms:* about 20 *(approximate — to confirm)*",
     );
   });
 
-  it("quotes every line of a multi-line enquiry", () => {
-    const body = buildProposalBody({ enquiry: { ...enquiry, message: "Line one\nLine two" }, reading: exact, toCheck: [], companyId: 1 });
-    expect(body.description_md.endsWith("**Original enquiry**\n> Line one\n> Line two")).toBe(true);
+  it("keeps the line breaks of a multi-line enquiry, and blank lines don't split it into paragraphs", () => {
+    const body = buildProposalBody({ enquiry: { ...enquiry, message: "Line one\n\nLine two" }, reading: exact, toCheck: [], companyId: 1 });
+    expect(body.description_md.endsWith("*Original enquiry*\nLine one\nLine two")).toBe(true);
+  });
+
+  it("uses only the markup Proposales renders: single-asterisk bold and line breaks", () => {
+    const body = buildProposalBody({ enquiry, reading: approximate, toCheck: ["Dates: x"], companyId: 1 });
+    expect(body.description_md).not.toMatch(/\*\*|^- |^> /m);
+  });
+
+  it("keeps the client's asterisks from turning text bold", () => {
+    const reading: Reading = { ...exact, catering: "Lunch *both* days" };
+    const body = buildProposalBody({ enquiry: { ...enquiry, message: "Kick-off *ASAP*" }, reading, toCheck: [], companyId: 1 });
+    expect(body.description_md).toContain("*Catering:* Lunch ∗both∗ days");
+    expect(body.description_md.endsWith("Kick-off ∗ASAP∗")).toBe(true);
   });
 
   describe("recipient", () => {
