@@ -104,6 +104,8 @@ The Proposales account is real, so calls are kept to a minimum. Unit tests pass 
 
 Upstash Redis, over REST, so it works from serverless functions without a connection pool. The keys are in [plan.md](plan.md#storage).
 
+The database belongs to this app alone. The keys aren't namespaced, so another app writing `enquiry:{id}` or `draft:{id}` into the same database would collide with this one.
+
 The app uses three operations:
 
 - **`SET NX`** to write once: uploaded rows, draft ids and locks.
