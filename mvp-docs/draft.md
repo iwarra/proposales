@@ -27,7 +27,7 @@ For the Northwind row in [ai-reading.md](ai-reading.md):
 
 | Part | Built from |
 |---|---|
-| Title | `{company or contact name}: {event name or "{guests} guests"}, {dates}` |
+| Title | `{company or contact name}: {event name or "{guests} guests"}, {dates}`. With neither a company nor a name: "New enquiry" |
 | Dates, guests, rooms | Exact: formatted ("12 Mar 2027 – 13 Mar 2027", "40"). Approximate: `asStated` plus "(approximate — to confirm)". Missing rooms: the line is left out |
 | Meeting space, catering, notes | Free text, shown when present |
 | To check | One line per approximate field. Left out when everything is exact |
