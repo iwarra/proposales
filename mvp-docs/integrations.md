@@ -9,7 +9,7 @@ The app talks to three outside services: Proposales, the LLM and Redis. Each sit
 | `PROPOSALES_API_TOKEN` | Yes | API key. In Proposales: **Settings → Profile** |
 | `PROPOSALES_COMPANY_ID` | Yes | The company drafts are created in. A positive whole number |
 | `PROPOSALES_API_URL` | No | Defaults to `https://api.proposales.com` |
-| `LLM_PROXY_URL`, `LLM_PROXY_KEY` | Yes | Where the model is reached. The URL must start with `https://` |
+| `LLM_PROXY_URL`, `LLM_PROXY_KEY` | Yes | Where the model is reached. The URL must start with `https://`. The one exception is `http://` on a Tailscale `*.ts.net` host, whose traffic WireGuard already encrypts. A Tailscale host is only reachable from inside the tailnet, so not from Vercel |
 | `LLM_MODEL` | No | Defaults to `claude-opus-5-5` |
 | `LLM_PROXY_FORMAT` | No | `anthropic` (default) or `openai`: which API the proxy speaks |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Yes | Redis. Set by Vercel's Upstash integration |
