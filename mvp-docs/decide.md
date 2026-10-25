@@ -41,6 +41,15 @@ type Decision =
 
 - `toCheck` has one line per approximate field.
 - `reasons` lists **every** reason, not just the first, so the salesperson sees everything at once. An ambiguous field's reason comes from the AI. The rest come from code.
+- Reasons that come from the policy table, not the checks:
+
+  | Case | Reason shown |
+  |---|---|
+  | Not an event enquiry | This isn't an event enquiry. |
+  | Ambiguous field | `{Field}: {the AI's reason}`, e.g. *Dates: 2027.12.03 could mean 3 Dec 2027 or 12 Mar 2027.* |
+  | Required field missing | `{Field}: not given in the enquiry.` |
+
+- `today` is the current date in UTC (`YYYY-MM-DD`).
 
 ## Where it's used
 
