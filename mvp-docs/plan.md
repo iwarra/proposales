@@ -31,6 +31,8 @@ src/
     proposales/           API client, reading → create-proposal body  ← body is pure
     drafts/               ensureDraft(): exactly one draft per enquiry
     processing/           one row end to end: lock → read → decide → draft
+    kv/                   the Redis operations, locks, and an in-memory fake for tests
+    env/                  reads and checks the environment variables
 ```
 
 The core (`decide()`, the proposal body, statuses) is pure and has no I/O. Redis, the LLM and Proposales sit at the edges and are passed in ([integrations.md](integrations.md)).
@@ -41,7 +43,8 @@ The core (`decide()`, the proposal body, statuses) is pure and has no I/O. Redis
 - **One parser for both formats.** In the server action that receives the upload: `xlsx.parse(Buffer.from(await file.arrayBuffer()))` from node-xlsx. It detects the format from the contents. It imports `fs`, so it runs in the Node runtime, not Edge.
 - **The first sheet only,** with the first row as headers.
 - **Every cell is read as text**, so values reach the AI exactly as written. "30-40" and "12-13 March" stay text, and leading zeros in phone numbers are kept. In `.xlsx`, cells formatted as dates become ISO dates (`2027-03-12`).
-- **Every non-empty cell is kept under its original header** (`columns`). The AI reads these, so nothing is lost.
+- **Every non-empty cell is kept under its original header** (`columns`). The AI reads these, so nothing is lost. A blank header becomes `Column N` and a repeated one gets ` (2)`, so no cell is dropped.
+- **A `.csv` without a BOM is read as UTF-8.** SheetJS would otherwise read it as Latin-1 and garble å/ä/ö, so a BOM is added before parsing.
 - A few headers are recognised up front, after lowercasing and removing everything but letters:
 
   | Field | Headers |
