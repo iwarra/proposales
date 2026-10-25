@@ -1,26 +1,72 @@
 @import "tailwindcss";
 
+/* Design tokens, taken from proposales.com. Defined once here; use only these. */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #292929;
+  --body: #353535;
+  --muted: color-mix(in srgb, var(--body) 70%, transparent);
+  --surface: #f9f9f9;
+  --surface-warm: #f6f6f3;
+  --chip: #eeeeee;
+  --line: rgb(0 0 0 / 0.12);
+  --button: #000000;
+  --button-text: #ffffff;
+  --danger: #ce1919;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #121212;
+    --foreground: #f2f2f2;
+    --body: #e2e2e2;
+    --muted: color-mix(in srgb, var(--body) 65%, transparent);
+    --surface: #1b1b1b;
+    --surface-warm: #1e1e1c;
+    --chip: #2a2a2a;
+    --line: rgb(255 255 255 / 0.14);
+    --button: #ffffff;
+    --button-text: #000000;
+    --danger: #ff6b6b;
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-body: var(--body);
+  --color-muted: var(--muted);
+  --color-surface: var(--surface);
+  --color-surface-warm: var(--surface-warm);
+  --color-chip: var(--chip);
+  --color-line: var(--line);
+  --color-button: var(--button);
+  --color-button-text: var(--button-text);
+  --color-danger: var(--danger);
+  --font-sans: "Switzer", Arial, sans-serif;
 }
 
 body {
   background: var(--background);
+  color: var(--body);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: var(--foreground);
+}
+
+:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 2px;
 }
