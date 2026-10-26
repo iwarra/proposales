@@ -13,6 +13,7 @@
     "@ai-sdk/anthropic": "4.0.88",
     "@ai-sdk/openai-compatible": "3.0.78",
     "@upstash/redis": "1.39.0",
+    "@vercel/analytics": "^2.0.1",
     "ai": "7.0.153",
     "next": "16.4.3",
     "node-xlsx": "0.24.0",
