@@ -14,6 +14,7 @@ Rules:
 - asStated is copied word for word, in the enquiry's language ("mitten av mars"). Don't fill in a day and don't translate.
 - reason says what the possible readings are, so a salesperson can act on it, e.g. "2027.12.03 could mean 3 Dec 2027 or 12 Mar 2027." Don't start it with the field name.
 - If unsure whether a value is approximate or ambiguous, choose ambiguous.
+- Label each field only from what the enquiry says about that field. Don't compare guests with rooms: more rooms than guests is checked elsewhere, so it's not a reason for ambiguous.
 - A date without a year means its next occurrence on or after the date the enquiry was received. Resolve relative dates ("next Friday") against the received date too. If there is no received date, a relative date is ambiguous.
 - isEnquiry is false for anything that isn't an event enquiry (e.g. "Please unsubscribe me").
 - eventName, meetingSpace, catering and notes are short free text from the enquiry, or null. notes holds anything else a salesperson should know.
@@ -32,6 +33,7 @@ Boundary cases:
 | "2027.12.03" | dates ambiguous: 3 Dec 2027 or 12 Mar 2027 |
 | "30–40 people", "about 40" | guests approximate |
 | Pax column 60, text says 40 | guests ambiguous |
+| "15 people", "25 single rooms" | guests exact 15, rooms exact 25 |
 | "no rooms needed" | rooms exact 0 |
 | Rooms not mentioned | rooms missing |
 | "Please unsubscribe me" | isEnquiry false |`;

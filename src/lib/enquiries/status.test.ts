@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Reading } from "../ai";
 import { createMemoryKv } from "../kv";
-import { listRows, rowStatus, STUCK_AFTER_MS } from "./status";
+import { isBeingRead, listRows, rowStatus, STUCK_AFTER_MS } from "./status";
 import { keys, saveUpload, type Enquiry, type Extraction } from "./store";
 
 const TODAY = "2026-10-25";
@@ -81,6 +81,33 @@ describe("rowStatus: the first rule that matches wins", () => {
       status: "blocked",
       reasons: ["Start date 2027-03-12 is in the past."],
     });
+  });
+});
+
+describe("isBeingRead: the AI is still on the row", () => {
+  it("Reading → yes", () => {
+    expect(isBeingRead({ status: "reading" })).toBe(true);
+  });
+
+  it("Received, not stuck yet → yes", () => {
+    expect(isBeingRead({ status: "received", stuck: false })).toBe(true);
+  });
+
+  it("Received and stuck → no, it waits for Retry", () => {
+    expect(isBeingRead({ status: "received", stuck: true })).toBe(false);
+  });
+
+  it("Drafted, Blocked, Ready, Failed → no", () => {
+    expect(isBeingRead({ status: "drafted", draft })).toBe(false);
+    expect(isBeingRead({ status: "blocked", reasons: ["x"] })).toBe(false);
+    expect(isBeingRead({ status: "ready" })).toBe(false);
+    expect(isBeingRead({ status: "failed", stage: "ai", error: "x" })).toBe(false);
+  });
+
+  it("a row past STUCK_AFTER_MS with no worker stops counting", () => {
+    const old = { ...enquiry, uploadedAt: NOW - STUCK_AFTER_MS };
+    expect(isBeingRead(rowStatus({ ...base, enquiry: old }))).toBe(false);
+    expect(isBeingRead(rowStatus({ ...base, enquiry: old, locked: true }))).toBe(true);
   });
 });
 

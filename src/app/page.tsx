@@ -1,8 +1,9 @@
 import { connection } from "next/server";
 import { decide } from "@/lib/decide";
-import { listRows, todayUtc, type Row } from "@/lib/enquiries";
+import { isBeingRead, listRows, todayUtc, type Row } from "@/lib/enquiries";
 import { Button, ButtonLink, Card, StatusChip } from "@/ui";
 import { getDeps } from "./deps";
+import { DemoBanner } from "./demo-banner";
 import { AutoRefresh, CreateDraftButton, RetryButton } from "./row-actions";
 import { UploadForm } from "./upload-form";
 
@@ -37,7 +38,7 @@ function RowCard({ row, today }: { row: Row; today: string }) {
         {status.status === "drafted" && (
           <div className="flex flex-wrap items-center gap-3">
             <ButtonLink href={status.draft.url} target="_blank" rel="noreferrer">
-              Open in Proposales ↗
+              Open the draft
             </ButtonLink>
             {confirm > 0 && <span className="text-muted">{confirm === 1 ? "1 value" : `${confirm} values`} to confirm</span>}
           </div>
@@ -73,10 +74,18 @@ function RowCard({ row, today }: { row: Row; today: string }) {
                 </li>
               ))}
             </ul>
-            <div>
-              <Button variant="secondary" disabled title="Coming in the next version">
-                Fix &amp; create draft — coming next
+            {/* Disabled buttons get no hover events, so the tooltip hangs off the wrapper. */}
+            <div className="group relative w-fit" tabIndex={0} aria-describedby={`v2-${row.enquiry.id}`}>
+              <Button variant="secondary" disabled>
+                Fix &amp; create draft
               </Button>
+              <span
+                id={`v2-${row.enquiry.id}`}
+                role="tooltip"
+                className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-md bg-button px-2.5 py-1.5 text-[13px] whitespace-nowrap text-button-text opacity-0 transition-opacity group-hover:opacity-100 group-focus:opacity-100"
+              >
+                Coming in V2
+              </span>
             </div>
           </div>
         )}
@@ -88,17 +97,67 @@ function RowCard({ row, today }: { row: Row; today: string }) {
 function Section({ title, hint, rows, today }: { title: string; hint?: string; rows: Row[]; today: string }) {
   if (rows.length === 0) return null;
   return (
-    <section className="mt-10">
-      <div className="mb-3 flex items-baseline justify-between gap-3">
-        <h2 className="text-xl">{title}</h2>
-        <span className="text-sm text-muted">{rows.length}</span>
+    <section className="mt-14 sm:mt-16">
+      <div className="mb-4 flex items-baseline justify-between gap-3">
+        <h2 className="text-2xl sm:text-3xl">{title}</h2>
+        <span className="text-base text-muted">{rows.length}</span>
       </div>
-      {hint && <p className="-mt-2 mb-3 text-sm text-muted">{hint}</p>}
-      <div className="flex flex-col gap-3">
+      {hint && <p className="-mt-1 mb-6 max-w-xl text-sm text-muted">{hint}</p>}
+      <div className="flex flex-col gap-4">
         {rows.map((row) => (
           <RowCard key={row.enquiry.id} row={row} today={today} />
         ))}
       </div>
+    </section>
+  );
+}
+
+const DraftedIcon = () => (
+  <svg aria-hidden viewBox="0 0 16 16" width="16" height="16" className="shrink-0">
+    <circle cx="8" cy="8" r="8" className="fill-success" />
+    <path d="M4.5 8.2l2.3 2.3 4.7-4.7" fill="none" className="stroke-background" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const BlockedIcon = () => (
+  <svg aria-hidden viewBox="0 0 16 16" width="16" height="16" className="shrink-0">
+    <circle cx="8" cy="8" r="8" className="fill-danger" />
+    <circle cx="8" cy="8" r="4.2" fill="none" className="stroke-background" strokeWidth="1.6" />
+    <path d="M5 5l6 6" className="stroke-background" strokeWidth="1.6" />
+  </svg>
+);
+
+const ProcessedIcon = () => (
+  <svg aria-hidden viewBox="0 0 16 16" width="16" height="16" className="shrink-0">
+    <circle cx="8" cy="8" r="7" fill="none" className="stroke-foreground" strokeWidth="1.6" />
+  </svg>
+);
+
+/** Processed means the AI has finished with the row: anything but Received or Reading. */
+function Summary({ rows }: { rows: Row[] }) {
+  if (rows.length === 0) return null;
+  const count = (...statuses: Row["status"]["status"][]) => rows.filter((row) => statuses.includes(row.status.status)).length;
+  const beingRead = rows.filter((row) => isBeingRead(row.status)).length;
+  const stats = [
+    { label: "Processed", value: rows.length - count("received", "reading"), icon: <ProcessedIcon /> },
+    { label: "Drafted", value: count("drafted"), icon: <DraftedIcon /> },
+    { label: "Blocked", value: count("blocked"), icon: <BlockedIcon /> },
+  ];
+  return (
+    <section aria-label="Summary" className="mt-8">
+      <Card tone="surface" className="px-2 py-1">
+        {/* Stacked rows on phones, one row of columns from sm up. */}
+        <dl className="grid grid-cols-1 divide-y divide-line sm:grid-cols-3 sm:divide-y-0">
+          {stats.map(({ label, value, icon }) => (
+            <div key={label} className="flex items-center gap-3 px-3 py-3 sm:flex-col sm:items-start sm:gap-1 sm:px-4">
+              {icon}
+              <dt className="text-sm text-muted">{label}</dt>
+              <dd className="ml-auto text-lg font-medium text-foreground sm:ml-0">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      </Card>
+      {beingRead > 0 && <p className="mt-2 text-sm text-muted">{beingRead} more being read by the AI…</p>}
     </section>
   );
 }
@@ -121,36 +180,34 @@ export default async function Page() {
   const rows = "rows" in loaded ? loaded.rows : [];
   const blocked = rows.filter((row) => row.status.status === "blocked");
   const others = rows.filter((row) => row.status.status !== "blocked");
-  const inProgress = rows.some((row) => row.status.status === "reading" || (row.status.status === "received" && !row.status.stuck));
+  const inProgress = rows.some((row) => isBeingRead(row.status));
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-16">
-      <AutoRefresh active={inProgress} />
-      <header className="mb-8">
-        <p className="text-sm text-muted">Proposales</p>
-        <h1 className="mt-1 text-4xl sm:text-5xl">Enquiry desk</h1>
-        <p className="mt-3 max-w-xl">
-          Upload a spreadsheet of enquiries. The AI reads every row, and a draft proposal appears in Proposales for each one it can safely
-          draft.
-        </p>
-      </header>
+    <>
+      <DemoBanner />
+      <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-16">
+        <AutoRefresh active={inProgress} />
+        <header className="mb-8">
+          <p className="text-xl font-medium text-muted">Proposales</p>
+          <h1 className="mt-1 text-4xl sm:text-5xl">Enquiry desk</h1>
+          <p className="mt-3 max-w-xl">
+            Upload a spreadsheet and let AI draft proposals. Blocked enquiries will be listed below for your immediate attention.
+          </p>
+        </header>
 
-      <UploadForm />
+        <UploadForm reading={inProgress} />
+        <Summary rows={rows} />
 
-      {"error" in loaded && (
-        <Card tone="surface" className="mt-6 p-4 text-danger">
-          Setup problem: {loaded.error}
-        </Card>
-      )}
+        {"error" in loaded && (
+          <Card tone="surface" className="mt-6 p-4 text-danger">
+            Setup problem: {loaded.error}
+          </Card>
+        )}
 
-      <Section
-        title="Needs attention"
-        hint="These could mean two things, so no draft was created. Handle them in Proposales, or fix the row in the sheet and upload it again."
-        rows={blocked}
-        today={today}
-      />
-      <Section title="Enquiries" rows={others} today={today} />
-      {"rows" in loaded && rows.length === 0 && <p className="mt-10 text-muted">No enquiries yet. Upload a sheet to start.</p>}
-    </main>
+        <Section title="Needs attention" hint="No draft was created for these." rows={blocked} today={today} />
+        <Section title="Enquiries" rows={others} today={today} />
+        {"rows" in loaded && rows.length === 0 && <p className="mt-10 text-muted">No enquiries yet. Upload a sheet to start.</p>}
+      </main>
+    </>
   );
 }

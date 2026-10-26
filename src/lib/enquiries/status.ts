@@ -38,6 +38,11 @@ export function rowStatus(input: {
   return { status: "ready" };
 }
 
+/** Received but not stuck, or reading: the AI is still on it, so the page keeps refreshing. */
+export function isBeingRead(status: RowStatus): boolean {
+  return status.status === "reading" || (status.status === "received" && !status.stuck);
+}
+
 /** Every uploaded row with its status, newest upload first. */
 export async function listRows(kv: Kv, now: number, today: string): Promise<Row[]> {
   const ids = await kv.zrangeNewestFirst(keys.enquiries);

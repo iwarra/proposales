@@ -13,6 +13,9 @@
   --button: #000000;
   --button-text: #ffffff;
   --danger: #ce1919;
+  --success: #1f8a3b;
+  --banner: rgb(59 130 246 / 0.5);
+  --banner-text: #1f1f1f;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -28,6 +31,8 @@
     --button: #ffffff;
     --button-text: #000000;
     --danger: #ff6b6b;
+    --success: #4cc46a;
+    --banner-text: #ffffff;
   }
 }
 
@@ -43,6 +48,9 @@
   --color-button: var(--button);
   --color-button-text: var(--button-text);
   --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-banner: var(--banner);
+  --color-banner-text: var(--banner-text);
   --font-sans: "Switzer", Arial, sans-serif;
 }
 

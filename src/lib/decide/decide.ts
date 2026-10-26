@@ -65,6 +65,12 @@ export function decide(reading: Reading, today: string): Decision {
     }
   }
 
+  // Only against a valid guest count, so 0 guests isn't reported twice.
+  const { guests, rooms } = reading;
+  if (guests.kind === "exact" && guests.count >= 1 && rooms.kind === "exact" && rooms.count > guests.count) {
+    reasons.push(`${rooms.count} rooms for ${guests.count} guests.`);
+  }
+
   if (reasons.length > 0) return { action: "block", reasons };
   if (toCheck.length > 0) return { action: "draft_with_checks", toCheck };
   return { action: "draft" };

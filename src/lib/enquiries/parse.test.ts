@@ -154,3 +154,12 @@ describe("public/example-enquiries.csv", () => {
     expect(result[2].message).toBe("Board dinner on 2027.12.03 for 12, private dining room");
   });
 });
+
+describe("public/blocked-enquiries.csv", () => {
+  it("parses into one row per blocking case, none rejected", async () => {
+    const { readFileSync } = await import("node:fs");
+    const result = parseSheet(readFileSync("public/blocked-enquiries.csv"), "blocked-enquiries.csv");
+    expect(rows(result)).toHaveLength(11);
+    expect(result).toMatchObject({ rejected: [] });
+  });
+});

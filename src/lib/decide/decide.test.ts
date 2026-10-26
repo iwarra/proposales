@@ -46,7 +46,7 @@ describe("decide(): the policy table", () => {
 
   describe("guests", () => {
     it("exact → draft", () => {
-      expect(decide(with_({ guests: { kind: "exact", count: 1 } }), TODAY)).toEqual({ action: "draft" });
+      expect(decide(with_({ guests: { kind: "exact", count: 1 }, rooms: { kind: "exact", count: 0 } }), TODAY)).toEqual({ action: "draft" });
     });
     it("approximate → draft, to confirm", () => {
       expect(decide(with_({ guests: { kind: "approximate", asStated: "30–40" } }), TODAY)).toEqual({
@@ -184,6 +184,24 @@ describe("decide(): code checks on exact values", () => {
     expect(decide(with_({ rooms: { kind: "exact", count: -2 } }), TODAY)).toEqual({
       action: "block",
       reasons: ["Number of rooms can't be negative."],
+    });
+  });
+
+  it("blocks more rooms than guests", () => {
+    expect(decide(with_({ guests: { kind: "exact", count: 18 }, rooms: { kind: "exact", count: 25 } }), TODAY)).toEqual({
+      action: "block",
+      reasons: ["25 rooms for 18 guests."],
+    });
+  });
+
+  it("allows as many rooms as guests", () => {
+    expect(decide(with_({ guests: { kind: "exact", count: 20 }, rooms: { kind: "exact", count: 20 } }), TODAY)).toEqual({ action: "draft" });
+  });
+
+  it("doesn't compare rooms with approximate guests", () => {
+    expect(decide(with_({ guests: { kind: "approximate", asStated: "about 10" } }), TODAY)).toEqual({
+      action: "draft_with_checks",
+      toCheck: ['Guests: the enquiry says "about 10".'],
     });
   });
 

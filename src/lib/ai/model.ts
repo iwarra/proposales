@@ -18,7 +18,7 @@ const fetchWithTimeout: typeof fetch = (input, init) =>
 export function createModelFromEnv(): LanguageModel {
   const baseURL = requireEnv("LLM_PROXY_URL", { https: "or-tailscale" });
   const apiKey = requireEnv("LLM_PROXY_KEY");
-  const modelId = optionalEnv("LLM_MODEL", "claude-opus-5-5");
+  const modelId = optionalEnv("LLM_MODEL", "claude-sonnet-5-5");
   const format = optionalEnv("LLM_PROXY_FORMAT", "anthropic");
 
   if (format === "anthropic") return createAnthropic({ baseURL, apiKey, fetch: fetchWithTimeout })(modelId);
