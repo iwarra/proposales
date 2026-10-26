@@ -2,7 +2,7 @@
 
 Upload a spreadsheet of hotel enquiries. An LLM reads every row, and a draft proposal is waiting in [Proposales](https://proposales.com) for each one it can safely draft, seconds later.
 
-**Live app:** <https://YOUR-APP.vercel.app> · **Repo:** <https://github.com/YOUR-USER/YOUR-REPO>
+**Live app:** <https://proposales.ivona.se> · **Repo:** <https://github.com/iwarra/proposales>
 
 > **Vague is fine. Ambiguous is not.**
 >
@@ -35,7 +35,7 @@ Nothing is guessed, and nothing is created twice.
 
 ## Try it in two minutes
 
-1. Open the [live app](https://YOUR-APP.vercel.app).
+1. Open the [live app](https://proposales.ivona.se).
 2. Click **Load example file** in the banner at the top and upload it, or upload [`public/example-enquiries.csv`](public/example-enquiries.csv) yourself.
 3. Watch the three rows go from **Received** to **Reading** and end up as **Drafted**, **Drafted** (to confirm) and **Blocked**. The list refreshes by itself.
 4. Open Proposales: two new drafts are waiting.
