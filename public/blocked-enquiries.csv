@@ -1,0 +1,12 @@
+Company,Contact name,Email,Received,Enquiry
+[TEST] Not an enquiry,Erik Holm,erik@example.com,2026-10-25,Please unsubscribe me from your newsletter.
+[TEST] Dates ambiguous,Frida Sand,frida@example.com,2026-10-25,"Team dinner on 2027.04.05 for 20 people, private dining room"
+[TEST] Dates missing,Gustav Ek,gustav@example.com,2026-10-25,"Workshop for 25 people with lunch and a projector, no rooms needed"
+[TEST] Guests ambiguous,Hanna Lind,hanna@example.com,2026-10-25,"Sales conference 8–9 April 2027 for 60 guests, but our booking form says 40. Plenary room and lunch, no rooms needed"
+[TEST] Guests missing,Ivar Berg,ivar@example.com,2026-10-25,"Strategy day on 15 April 2027, plenary room and lunch"
+[TEST] Rooms ambiguous,Julia Nord,julia@example.com,2026-10-25,"Kick-off 20–21 May 2027 for 30 people. We need 15 or 30 rooms, depending on whether people share"
+[TEST] Date not real,Karl Vik,karl@example.com,2026-10-25,"Summit on 30 February 2027 for 50 people, no rooms needed"
+[TEST] Date in the past,Lena Strand,lena@example.com,2026-10-25,"Gala dinner on 14 March 2026 for 80 guests, no rooms needed"
+[TEST] End before start,Magnus Dahl,magnus@example.com,2026-10-25,"Retreat from 14 June to 10 June 2027 for 12 people, 12 rooms"
+[TEST] No guests,Nora Fors,nora@example.com,2026-10-25,"Meeting room on 3 March 2027 for 0 guests, no rooms needed"
+[TEST] More rooms than guests,Oskar Lund,oskar@example.com,2026-10-25,"Partner retreat 30 June – 2 July 2027 for 15 people. We need 25 single rooms"
