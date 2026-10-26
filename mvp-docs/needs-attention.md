@@ -2,11 +2,11 @@
 
 ## In the MVP: show them
 
-Under the upload form, "Needs attention" lists every row that `decide()` blocked. Each row shows:
+Under the upload form and the summary, "Needs attention" lists every row that `decide()` blocked, with the hint *"No draft was created for these."* Each row shows:
 
 - the status **Blocked**,
 - every reason from `decide()`, e.g. *"Dates: 2027.12.03 could mean 3 Dec 2027 or 12 Mar 2027."*,
-- one **disabled** button: **Fix & create draft — coming next**.
+- one **disabled** button: **Fix & create draft**. Hovering or focusing it shows *"Coming in V2"*.
 
 No draft is created and nothing on the row can be edited. For now the salesperson writes that proposal in Proposales themselves, or fixes the row in the sheet and uploads it again. A changed row is a new enquiry, because an enquiry's id comes from its content.
 
@@ -15,7 +15,7 @@ No draft is created and nothing on the row can be edited. For now the salesperso
 │ Northwind: Kick-off                              ● Blocked   │
 │ Dates: 2027.12.03 could mean 3 Dec 2027 or 12 Mar 2027.      │
 │                                                              │
-│ [ Fix & create draft — coming next ]          (disabled)     │
+│ [ Fix & create draft ]   (disabled, tooltip "Coming in V2")  │
 └──────────────────────────────────────────────────────────────┘
 ```
 

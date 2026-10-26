@@ -72,6 +72,7 @@ The rest of the answer:
 - **`asStated` is copied word for word**, in the enquiry's language ("mitten av mars"). No day is filled in and nothing is translated.
 - **`reason` says what the readings are**, so a salesperson can act on it: *"2027.12.03 could mean 3 Dec 2027 or 12 Mar 2027."*
 - **If unsure whether a value is approximate or ambiguous, choose ambiguous.** In doubt, the row is blocked rather than guessed.
+- **Each field is labelled from what the enquiry says about that field.** Guests and rooms aren't compared with each other: more rooms than guests is checked by code ([decide.md](decide.md)), so the AI doesn't block it or explain it twice.
 - **A date without a year** means its next occurrence on or after the date the enquiry was received. Relative dates ("next Friday") are resolved against that date too.
 
 ### Boundary cases
@@ -90,6 +91,7 @@ These go into the prompt as examples.
 | "2027.12.03" | dates `ambiguous`: 3 Dec 2027 or 12 Mar 2027 |
 | "30–40 people", "about 40" | guests `approximate` |
 | Pax column 60, text says 40 | guests `ambiguous` |
+| "15 people", "25 single rooms" | guests `exact` 15, rooms `exact` 25 |
 | "no rooms needed" | rooms `exact` 0 |
 | Rooms not mentioned | rooms `missing` |
 | "Please unsubscribe me" | `isEnquiry: false` |

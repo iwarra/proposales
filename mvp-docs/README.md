@@ -1,6 +1,6 @@
 # Proposals that create themselves: MVP
 
-> **Status: planned.** These docs describe the MVP: what it does and how to build it.
+> **Status: built.** These docs describe the MVP: what it does and how it's built. They are the source of truth: the code follows them.
 
 A hotel salesperson uploads a spreadsheet of enquiries. The AI reads every row, and a draft proposal appears in Proposales for each one it can safely draft.
 
@@ -24,7 +24,7 @@ For the salesperson there are three outcomes:
 3. **The AI labels the dates, the guest count and the rooms count:** exact, approximate, ambiguous or missing. It also says whether the row is an event enquiry at all.
 4. **Code decides, not the AI.** `decide()` applies a fixed policy table: draft, draft with values to confirm, or blocked.
 5. **The draft appears in Proposales.** Approximate values are shown as the client wrote them, with a "To check" list and the original enquiry quoted. Each enquiry gets only one draft.
-6. **Blocked rows are listed under "Needs attention"** with the reason. A disabled "Fix & create draft — coming next" button shows what the next version adds.
+6. **Blocked rows are listed under "Needs attention"** with the reason. A disabled "Fix & create draft" button, marked "Coming in V2", shows what the next version adds.
 
 ```mermaid
 flowchart TD
@@ -57,3 +57,10 @@ flowchart TD
 | [when-things-go-wrong.md](when-things-go-wrong.md) | Failures, retries, duplicates and concurrent requests |
 | [integrations.md](integrations.md) | Proposales API, retry rules, LLM and Redis setup, environment |
 | [plan.md](plan.md) | Stack, modules, parsing, storage, design, build order, testing, and what's left out |
+
+## Test sheets
+
+| File | Rows | Expect |
+|---|---|---|
+| `public/example-enquiries.csv` | 3: one clear, one vague, one ambiguous | A draft, a draft to confirm, a blocked row. The demo banner loads it |
+| `public/blocked-enquiries.csv` | 11: one per reason a row is blocked | 11 blocked rows, no drafts. The company name says which case each row tests |

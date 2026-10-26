@@ -25,6 +25,7 @@ Two rules apply to the whole row:
 | dates | End date is before the start date | End date is before the start date. |
 | guests | Fewer than 1 | Number of guests must be at least 1. |
 | rooms | Negative | Number of rooms can't be negative. |
+| rooms | More rooms than guests (both `exact`, guests at least 1) | {rooms} rooms for {guests} guests. |
 
 A real date must survive a round trip through `Date` unchanged. That rejects `2027-02-30`, which JavaScript would otherwise turn into 2 March.
 

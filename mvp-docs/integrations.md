@@ -4,15 +4,15 @@ The app talks to three outside services: Proposales, the LLM and Redis. Each sit
 
 ## Environment
 
-| Variable | Required | Meaning |
-|---|---|---|
-| `PROPOSALES_API_TOKEN` | Yes | API key. In Proposales: **Settings → Profile** |
-| `PROPOSALES_COMPANY_ID` | Yes | The company drafts are created in. A positive whole number |
-| `PROPOSALES_API_URL` | No | Defaults to `https://api.proposales.com` |
-| `LLM_PROXY_URL`, `LLM_PROXY_KEY` | Yes | Where the model is reached. The URL must start with `https://`. The one exception is `http://` on a Tailscale `*.ts.net` host, whose traffic WireGuard already encrypts. A Tailscale host is only reachable from inside the tailnet, so not from Vercel |
-| `LLM_MODEL` | No | Defaults to `claude-opus-5-5` |
-| `LLM_PROXY_FORMAT` | No | `anthropic` (default) or `openai`: which API the proxy speaks |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Yes | Redis. Set by Vercel's Upstash integration |
+| Variable                                             | Required | Meaning                                                         |
+| ---------------------------------------------------- | -------- | --------------------------------------------------------------- |
+| `PROPOSALES_API_TOKEN`                               | Yes      | API key. In Proposales: **Settings → Profile**                  |
+| `PROPOSALES_COMPANY_ID`                              | Yes      | The company drafts are created in. A positive whole number      |
+| `PROPOSALES_API_URL`                                 | No       | Defaults to `https://api.proposales.com`                        |
+| `LLM_PROXY_URL`, `LLM_PROXY_KEY`                     | Yes      | Where the model is reached. The URL must start with `https://`. |
+| `LLM_MODEL`                                          | No       | Defaults to `claude-sonnet-5-5`                                 |
+| `LLM_PROXY_FORMAT`                                   | No       | `anthropic` (default) or `openai`: which API the proxy speaks   |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Yes      | Redis. Set by Vercel's Upstash integration                      |
 
 A missing or malformed value fails with a message naming the variable, not a vague network error later.
 
@@ -32,12 +32,17 @@ Spec: <https://docs.proposales.com/openapi.json>. Base URL `https://api.proposal
 
 ```json
 {
-  "company_id": 1234,
-  "language": "en",
-  "title_md": "Northwind: Kick-off, mid March",
-  "description_md": "- **Dates:** mid March *(approximate — to confirm)*\n…",
-  "recipient": { "first_name": "Anna", "last_name": "Berg", "email": "anna@northwind.se", "company_name": "Northwind" },
-  "data": { "enquiry_id": "…", "source": "enquiry-desk" }
+	"company_id": 1234,
+	"language": "en",
+	"title_md": "Northwind: Kick-off, mid March",
+	"description_md": "- **Dates:** mid March *(approximate — to confirm)*\n…",
+	"recipient": {
+		"first_name": "Anna",
+		"last_name": "Berg",
+		"email": "anna@northwind.se",
+		"company_name": "Northwind"
+	},
+	"data": { "enquiry_id": "…", "source": "enquiry-desk" }
 }
 ```
 
@@ -49,12 +54,12 @@ It returns `{ "proposal": { "uuid", "url" } }`. How the title and description ar
 
 **Find an earlier draft:** `GET /v3/proposal-search`
 
-| Query | Value |
-|---|---|
-| `company_id` | The company id |
-| `filter[enquiry_id]` | The enquiry's id |
-| `include_archived` | `true`, so a draft someone archived is never silently recreated |
-| `limit` | `1` |
+| Query                | Value                                                           |
+| -------------------- | --------------------------------------------------------------- |
+| `company_id`         | The company id                                                  |
+| `filter[enquiry_id]` | The enquiry's id                                                |
+| `include_archived`   | `true`, so a draft someone archived is never silently recreated |
+| `limit`              | `1`                                                             |
 
 It returns `{ "data": [{ "uuid", "url", "title", "status", "data", … }] }` (at most 25 items), or an empty list. The app reads only `uuid` and `url`.
 
@@ -74,12 +79,12 @@ Every error response has the same body:
 
 Each request has an **8 s timeout** and at most **3 attempts**, with backoff of 250 ms, then 500 ms. Whether a failed request is retried depends on whether it could have had an effect:
 
-| Failure | Search | Create |
-|---|---|---|
-| No response (network error, timeout) | Retry | **Don't retry.** The draft may exist |
-| 5xx | Retry | **Don't retry.** The draft may exist |
-| 429 (rate limited) | Retry | Retry. Nothing was created |
-| Other 4xx | Don't retry | Don't retry |
+| Failure                              | Search      | Create                               |
+| ------------------------------------ | ----------- | ------------------------------------ |
+| No response (network error, timeout) | Retry       | **Don't retry.** The draft may exist |
+| 5xx                                  | Retry       | **Don't retry.** The draft may exist |
+| 429 (rate limited)                   | Retry       | Retry. Nothing was created           |
+| Other 4xx                            | Don't retry | Don't retry                          |
 
 A search changes nothing, so it's always safe to repeat. After a create fails with no response or a 5xx, the next attempt **searches first** ([guard 3](when-things-go-wrong.md#exactly-one-draft-per-enquiry)). That's what makes every Retry safe.
 

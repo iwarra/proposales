@@ -45,4 +45,4 @@ Every draft is created by `ensureDraft()`, which has three guards: a saved draft
 
 ## After the draft is created
 
-The row shows **Drafted** with a link to the proposal. The salesperson confirms the "To check" values in Proposales. The app doesn't track that: the row simply stays Drafted.
+The row shows **Drafted**, an **Open the draft** link to the proposal and, when there are any, how many values are to confirm ("1 value to confirm"). The salesperson confirms the "To check" values in Proposales. The app doesn't track that: the row simply stays Drafted.

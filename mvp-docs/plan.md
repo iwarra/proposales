@@ -89,6 +89,8 @@ The page follows **proposales.com**, so it feels like part of Proposales. The va
 | line | black at 12% | white at 14% | Borders |
 | button / button text | `#000000` / `#ffffff` | `#ffffff` / `#000000` | Primary buttons |
 | danger | `#ce1919` | `#ff6b6b` | Blocked and Failed |
+| success | `#1f8a3b` | `#4cc46a` | Drafted |
+| banner / banner text | blue-500 at 50% / `#1f1f1f` | blue-500 at 50% / `#ffffff` | The demo banner |
 
 | Element | Style |
 |---|---|
@@ -101,7 +103,7 @@ The page follows **proposales.com**, so it feels like part of Proposales. The va
 | Chip (status) | 24 px high, 13 px text, fully rounded, chip background |
 | Focus | 2 px outline in foreground, 2 px offset |
 
-Monochrome throughout. Danger red is the only colour, used for Blocked and Failed. Dark mode follows the system setting.
+Monochrome throughout. Danger red marks Blocked and Failed, success green marks Drafted, and the demo banner is blue. Dark mode follows the system setting.
 
 ## Before building: verify two unknowns
 
@@ -119,7 +121,7 @@ Each step is built test-first and ends with something that runs.
 5. **Proposales client.** The two endpoints and the retry rules ([integrations.md](integrations.md#timeouts-and-retries)). Tests with a fake `fetch`.
 6. **`ensureDraft()`.** The three guards. Tests in memory for double calls, racing calls, and a crash after Proposales created the draft.
 7. **Processing.** Lock → read (skip the AI if already read) → `decide()` → `ensureDraft()`. After an upload, run in the background, 4 rows at a time. Failures are saved with their reason.
-8. **Page,** in the design above. Upload form, row list with status chips, reasons for blocked rows, Retry and Create draft buttons, the disabled "Fix & create draft — coming next" button. Refreshes itself while rows are in progress.
+8. **Page,** in the design above. A demo banner that loads or downloads the 3-row sheet, the upload form, a summary (processed, drafted, blocked), "Needs attention" and the other rows with status chips, reasons for blocked rows, Retry and Create draft buttons, the disabled "Fix & create draft" button with a "Coming in V2" tooltip. Refreshes itself while rows are in progress. The upload message says the AI is reading only while it is.
 9. **Deploy to Vercel** with the environment from [integrations.md](integrations.md#environment).
 10. **End-to-end test** on the live link with a 3-row sheet: one exact, one approximate, one ambiguous. Expect two drafts and one blocked row. Upload it again and expect no new drafts.
 11. **README.** The flow, "what happens when things go wrong" ([when-things-go-wrong.md](when-things-go-wrong.md)), and how concurrent requests are handled. See the definition of done in [case.md](case.md#definition-of-done).
@@ -141,4 +143,4 @@ Proposales is a real account, so calls to it are kept to a minimum:
 | Hidden hints on approximate values (e.g. a month for "mid March") | The salesperson confirms approximate values anyway, and a second value can disagree with the first |
 | Catching vague dates in the past | Left to the prompt. An exact date in the past is blocked by code |
 | Tracking when the salesperson confirms a value | The row stays Drafted |
-| An eval set | The boundary cases are in the prompt. The 3-row sheet is the end-to-end test |
+| An eval set | The boundary cases are in the prompt. The 3-row sheet is the end-to-end test, and `public/blocked-enquiries.csv` has one row per blocking case |
